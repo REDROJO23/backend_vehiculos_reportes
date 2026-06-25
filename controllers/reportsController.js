@@ -1,15 +1,30 @@
 const Reports = require('../models/reportsModel');
 
+// Obtener todos los reportes
 exports.getReports = async (req, res) => {
   try {
     const data = await Reports.getAll();
-    res.json(data);
+
+    // Transformar la fecha a DD/MM/YYYY
+    const datosFormateados = data.map(r => {
+      if (r.fecha) {
+        const fecha = new Date(r.fecha);
+        const dia = String(fecha.getDate()).padStart(2, '0');
+        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+        const anio = fecha.getFullYear();
+        return { ...r, fecha: `${dia}/${mes}/${anio}` };
+      }
+      return r;
+    });
+
+    res.json(datosFormateados);
   } catch (error) {
     console.error('Error en getReports:', error);
     res.status(500).json({ error: 'Error al obtener reportes', detalle: error.message });
   }
 };
 
+// Agregar un nuevo reporte
 exports.addReport = async (req, res) => {
   try {
     console.log('Datos recibidos en addReport:', req.body);
@@ -22,6 +37,7 @@ exports.addReport = async (req, res) => {
   }
 };
 
+// Actualizar un reporte
 exports.updateReport = async (req, res) => {
   try {
     const { id } = req.params;
@@ -35,6 +51,7 @@ exports.updateReport = async (req, res) => {
   }
 };
 
+// Eliminar un reporte
 exports.deleteReport = async (req, res) => {
   try {
     const { id } = req.params;
